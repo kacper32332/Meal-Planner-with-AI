@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "my-django-stack"
+resolve_s3 = true
+s3_prefix = "my-django-stack"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = []
+
+[default.global.parameters]
+region = "eu-central-1"
