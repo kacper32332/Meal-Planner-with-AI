@@ -11,10 +11,45 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import boto3
+from botocore.exceptions import ClientError
+import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from pathlib import Path
 from datetime import timedelta
 
+def get_secret(secret_name, region_name):
+    session = boto3.session.Session()
+    client = session.client(service_name='secretsmanager', region_name=region_name)
+
+    try:
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+    except ClientError as e:
+        raise e
+
+    return get_secret_value_response['SecretString']
+
+secret_name = os.environ.get('SECRET_NAME')
+region_name = os.environ.get('AWS_REGION_NAME', 'eu-central-1')
+
+django_secret_name = os.environ.get('DJANGO_SECRET_KEY_NAME')
+region_name = os.environ.get('AWS_REGION_NAME', 'eu-central-1')
+
+
+if secret_name:
+    db_url = get_secret(secret_name, region_name)
+else:
+    db_url = os.environ.get('DATABASE_URL')
+
+if django_secret_name:
+    SECRET_KEY = get_secret(django_secret_name, region_name)
+else:
+    SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-local-secret-key')
+
+# 3. Configure the database
+DATABASES = {
+    'default': dj_database_url.parse(db_url, conn_max_age=600)
+}
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,14 +57,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-def get_secret(key):
-    try:
-        return os.environ[key]
-    except KeyError:
-        raise ImproperlyConfigured(f'Missing {key} environment variable.')
+# def get_secret(key):
+#     try:
+#         return os.environ[key]
+#     except KeyError:
+#         raise ImproperlyConfigured(f'Missing {key} environment variable.')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_secret('DJANGO_SECRET_KEY')
+# SECRET_KEY = get_secret('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -119,16 +154,16 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
-        'PORT': 5432
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',
+#         'USER': 'postgres',
+#         'PASSWORD': 'postgres',
+#         'HOST': 'db',
+#         'PORT': 5432
+#     }
+# }
 
 
 # Password validation

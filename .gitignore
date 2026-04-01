@@ -11,6 +11,18 @@ db.sqlite3
 db.sqlite3-journal
 media
 
+# Created by https://www.toptal.com/developers/gitignore/api/sam
+# Edit at https://www.toptal.com/developers/gitignore?templates=sam
+
+### SAM ###
+# Ignore build directories for the AWS Serverless Application Model (SAM)
+# Info: https://aws.amazon.com/serverless/sam/
+# Docs: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-reference.html
+
+**/.aws-sam
+
+# End of https://www.toptal.com/developers/gitignore/api/sam
+
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
 # in your Git repository. Update and uncomment the following line accordingly.
 # <django-project-name>/staticfiles/
@@ -305,3 +317,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .vscode/settings.json
+response.json
+samconfig.toml

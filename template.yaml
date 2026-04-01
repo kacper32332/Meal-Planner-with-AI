@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Containerized Django Backend with Lambda Web Adapter
+
+Parameters:
+  VpcSecurityGroupId:
+    Type: String
+    Description: "The ID of the security group for Lambda functions"
+  VpcSubnetId:
+    Type: String
+    Description: "The ID of the subnet for Lambda functions"
+  Stage:
+    Type: String
+    Default: "prod"
+    Description: "Deployment stage (e.g., dev, staging, prod)"
+
+Resources:
+  DjangoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      MemorySize: 512
+      Timeout: 30
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref VpcSecurityGroupId
+        SubnetIds:
+          - !Ref VpcSubnetId
+      Events:
+        HttpApiEvent:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+      Environment:
+        Variables:
+          DJANGO_SETTINGS_MODULE: app.settings
+          SECRET_NAME: !Sub "${Stage}/django/databade_url"
+          AWS_REGION_NAME: eu-central-1
+          AWS_LWA_PORT: "8000"
+          DJANGO_SECRET_KEY_NAME: !Sub "${Stage}/django/secret_key"
+      Policies: 
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${Stage}/django/*"
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: .
+      DockerTag: latest
+  MigrationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      MemorySize: 512
+      Timeout: 30
+      ImageConfig:
+        Command: ["python", "manage.py", "migrate"]
+      Environment:
+        Variables:
+          DJANGO_SETTINGS_MODULE: app.settings
+          SECRET_NAME: !Sub "${Stage}/django/databade_url"
+          AWS_REGION_NAME: eu-central-1
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref VpcSecurityGroupId
+        SubnetIds:
+          - !Ref VpcSubnetId
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${Stage}/django/databade_url-*"
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: .
+      DockerTag: latest
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL for your Django App"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"

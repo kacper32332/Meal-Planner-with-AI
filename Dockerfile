@@ -1,5 +1,7 @@
 FROM python:3.10-slim
 
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.0.0 /lambda-adapter /opt/extensions/lambda-adapter
+
 ENV PYTHONUNBUFFERED=1
 
 COPY ./requirements.txt /requirements.txt
@@ -10,23 +12,15 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# apk add --update --upgrage --no-cache postgresql-client && \
-#     apk add --update --upgrade --no-cache --virtual .tmp \
-#     build-base postgresql-dev
-
-# RUN apk update && apk add --no-cache bash postgresql-dev gcc musl-dev
 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN python -m nltk.downloader -d /usr/local/share/nltk_data wordnet
+# RUN python -m nltk.downloader -d /usr/local/share/nltk_data wordnet
 
-# COPY scripts/wait-for-it.sh /wait-for-it.sh
-# RUN chmod +x /wait-for-it.sh
-
-# RUN mkdir /app
 COPY ./app /app
 WORKDIR /app
 
 RUN useradd -m user
 USER user
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "app.wsgi:application", "--bind", "0.0.0.0:8000"]
