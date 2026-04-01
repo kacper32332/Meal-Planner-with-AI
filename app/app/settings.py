@@ -40,6 +40,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 if secret_name:
     db_url = get_secret(secret_name, region_name)
+else:
+    db_url = os.environ.get('DATABASE_URL')
 
 if not db_url:
     print(f"Attempting to fetch AWS Secret: {secret_name}")
