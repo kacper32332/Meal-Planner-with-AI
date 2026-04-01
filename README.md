@@ -1,6 +1,9 @@
-# 🧠 Meal Planner with AI
+## This is a fork of Meal Planner with AI project.
 
-## 📌 Project Overview
+This repository is a serverless refactor of my original Meal Planner web application project. While the original relied on Docker Compose for orchestration, this version is optimized for AWS Lambda using the AWS Lambda Web Adapter (LWA) and Amazon RDS.
 
-**Meal Planner with AI** is a web application designed to help users plan meals, generate recipes based on available ingredients, and create shopping lists. By analyzing user input such as dietary preferences, available ingredients, and health goals, the app leverages Artificial Intelligence (AI) to suggest personalized recipe ideas. It integrates a modern tech stack across frontend, backend, and AI services to deliver an efficient and tailored meal planning experience.
-
+- Backend: Django running in AWS Lambda (via Docker container images).
+- Web Adapter: Allows the Django app to run on Lambda without code changes.
+- Database: Amazon RDS (PostgreSQL).
+- Deployment: Managed via AWS SAM.
+- Frontend:
