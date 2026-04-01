@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 import boto3
-from botocore.exceptions import ClientError
+import json
+from botocore.exceptions import ClientError, NoCredentialsError
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from pathlib import Path
@@ -35,11 +36,30 @@ region_name = os.environ.get('AWS_REGION_NAME', 'eu-central-1')
 django_secret_name = os.environ.get('DJANGO_SECRET_KEY_NAME')
 region_name = os.environ.get('AWS_REGION_NAME', 'eu-central-1')
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 if secret_name:
     db_url = get_secret(secret_name, region_name)
-else:
-    db_url = os.environ.get('DATABASE_URL')
+
+if not db_url:
+    print(f"Attempting to fetch AWS Secret: {secret_name}")
+    try:
+        raw_secret_string = get_secret(secret_name, region_name)
+        secret_dict = json.loads(raw_secret_string)
+        
+        engine = secret_dict.get('engine', 'postgres')
+        user = secret_dict.get('username')
+        password = secret_dict.get('password')
+        host = secret_dict.get('host')
+        port = secret_dict.get('port', 5432)
+        dbname = secret_dict.get('dbname', 'postgres')
+        
+        db_url = f"{engine}://{user}:{password}@{host}:{port}/{dbname}"
+        print("Successfully parsed database credentials from AWS Secrets Manager.")
+        
+    except Exception as e:
+        print(f"CRITICAL ERROR FETCHING/PARSING DB CREDENTIALS: {e}")
+        raise e
 
 if django_secret_name:
     SECRET_KEY = get_secret(django_secret_name, region_name)
@@ -50,9 +70,6 @@ else:
 DATABASES = {
     'default': dj_database_url.parse(db_url, conn_max_age=600)
 }
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -105,6 +122,7 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -201,6 +219,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

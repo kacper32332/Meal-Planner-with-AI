@@ -14,7 +14,6 @@ RUN apt-get update && apt-get install -y \
 
 
 RUN pip install --no-cache-dir -r requirements.txt
-# RUN python -m nltk.downloader -d /usr/local/share/nltk_data wordnet
 
 COPY ./app /app
 WORKDIR /app
@@ -23,4 +22,4 @@ RUN useradd -m user
 USER user
 
 # CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-CMD ["gunicorn", "app.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "8", "--timeout", "0", "app.wsgi:application"]

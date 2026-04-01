@@ -21,6 +21,8 @@ Resources:
       PackageType: Image
       MemorySize: 512
       Timeout: 30
+      ImageConfig:
+        Command: ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "8", "--timeout", "0", "app.wsgi:application"]
       VpcConfig:
         SecurityGroupIds:
           - !Ref VpcSecurityGroupId

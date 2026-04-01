@@ -319,3 +319,4 @@ dist
 .vscode/settings.json
 response.json
 samconfig.toml
+app/datadump.json
