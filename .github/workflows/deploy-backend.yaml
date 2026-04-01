@@ -1,0 +1,52 @@
+name: Deploy Django Backend to AWS Lambda
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Download your code onto the GitHub server
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 2. Install Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3. Install the AWS SAM CLI
+      - name: Set up AWS SAM
+        uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      # 4. Log in to your AWS account using the secrets you saved
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      # 5. Build your Docker container (exactly like running it on your laptop)
+      - name: Build SAM Application
+        run: sam build
+
+      # 6. Deploy to AWS! 
+      # The flags tell SAM not to wait for you to press "Y" to confirm
+      - name: Deploy SAM Application
+        run: >
+          sam deploy 
+          --no-confirm-changeset 
+          --no-fail-on-empty-changeset
+          --resolve-image-repos
+          --parameter-overrides
+          VpcSecurityGroupId=${{ secrets.VPC_SECURITY_GROUP_ID }}
+          VpcSubnetId=${{ secrets.VPC_SUBNET_ID }}
+          Stage=prod
