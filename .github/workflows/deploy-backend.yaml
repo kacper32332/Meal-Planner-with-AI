@@ -43,9 +43,12 @@ jobs:
       - name: Deploy SAM Application
         run: >
           sam deploy 
+          --stack-name my-django-stack
+          --resolve-s3
+          --resolve-image-repos
+          --capabilities CAPABILITY_IAM
           --no-confirm-changeset 
           --no-fail-on-empty-changeset
-          --resolve-image-repos
           --parameter-overrides
           VpcSecurityGroupId=${{ secrets.VPC_SECURITY_GROUP_ID }}
           VpcSubnetId=${{ secrets.VPC_SUBNET_ID }}
