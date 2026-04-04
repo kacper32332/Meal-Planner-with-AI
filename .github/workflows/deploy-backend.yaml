@@ -27,7 +27,8 @@ jobs:
           DJANGO_SECRET_KEY: "test-key-123"
           DATABASE_URL: "sqlite:///:memory:"
         run: |
-          python app/manage.py test
+          cd app
+          python manage.py test
 
       - name: Set up AWS SAM
         uses: aws-actions/setup-sam@v2
