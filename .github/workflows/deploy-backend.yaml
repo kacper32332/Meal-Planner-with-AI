@@ -17,6 +17,13 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Run Tests
+        env:
+          DJANGO_SECRET_KEY: "test-key-123"
+          DATABASE_URL: "sqlite:///:memory:"
+        run: |
+          python manage.py test
+
       - name: Set up AWS SAM
         uses: aws-actions/setup-sam@v2
         with:
