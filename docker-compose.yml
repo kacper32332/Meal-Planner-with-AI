@@ -1,36 +1,35 @@
 services:
   frontend:
     build:
-      context: .
+      context: ../Meal-Planner-frontend
       dockerfile: Dockerfile.frontend
     ports:
       - 5173:5173
     develop:
       watch:
         - action: sync
-          path: ./frontend
+          path: ../Meal-Planner-frontend
           target: /frontend
           ignore:
            - node_modules
   app:
     build:
       context: .
+      args:
+        REQUIREMENTS_FILE: local.txt
     ports:
       - "8000:8000"
     volumes:
       - ./app:/app
     command: >
       sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    # environment:
-    #   - DB_HOST=db
-    #   - DB_NAME=postgres
-    #   - DB_USER=postgres
-    #   - DB_PASS=postgres
     env_file:
       - .env
-    # depends_on:
-    #   db:
-    #     condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+    depends_on:
+      db:
+        condition: service_healthy
   db:
     image: postgres
     volumes:

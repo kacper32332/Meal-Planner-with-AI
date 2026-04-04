@@ -1,0 +1,22 @@
+# base
+Django>=5.2,<5.3
+djangorestframework>=3.16.0,<3.17.0
+django-cors-headers==4.6.0
+django-filter>=24.1,<25.0
+
+# auth
+djangorestframework-simplejwt
+dj-rest-auth[with_social]>=2.2.5,<3.0
+django-allauth>=0.50.0,<0.53.0
+google-auth>=2.29.0,<3.0.0
+
+# db
+psycopg2-binary>=2.9.0,<3.0.0
+dj-database-url<=2.1.0
+
+# cloud
+boto3<=1.28.0
+whitenoise==6.4.0
+
+# docs
+drf-spectacular==0.29.0

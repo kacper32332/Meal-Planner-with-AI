@@ -4,7 +4,9 @@ COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.0.0 /lambda-adapter /opt
 
 ENV PYTHONUNBUFFERED=1
 
-COPY ./requirements.txt /requirements.txt
+ARG REQUIREMENTS_FILE=prod.txt
+
+COPY ./requirements /requirements
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -13,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r /requirements/${REQUIREMENTS_FILE}
 
 COPY ./app /app
 WORKDIR /app

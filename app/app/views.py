@@ -10,6 +10,8 @@ from django.db.models import Q, Count
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.http import JsonResponse
+from django.db import connection
 
 from django_filters import rest_framework as dj_filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -881,3 +883,12 @@ class MealStatsView(APIView):
             "meal_types": {m["meal_type"]: m["count"] for m in meal_type_counts},
             "top_ingredients": list(top_ingredients),
         })
+
+
+def health_check(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        return JsonResponse({"status": "healthy", "database": "connected"}, status=200)
+    except Exception as e:
+        return JsonResponse({"status": "unhealthy", "database": "disconnected", "error": str(e)}, status=503)

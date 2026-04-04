@@ -3,6 +3,7 @@ from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from app.views import GoogleLoginView
 from app.views import CreateUserView
 from app.views import (
@@ -20,7 +21,8 @@ from app.views import (
     IngredientAllDataViewSet,
     IngredientAllDataUnfilteredViewSet,
     RecipeSearchView,
-    matching_recipes
+    matching_recipes,
+    health_check
 )
 
 router = DefaultRouter()
@@ -43,6 +45,8 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='get_token'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh'),
     path('api-auth/', include('rest_framework.urls')),
+
+    path('api/health/', health_check, name='health-check'),
     
     path('api/', include(router.urls)),
     path("api/stats/summary/", MealStatsView.as_view(), name="meal-stats"),
@@ -51,4 +55,8 @@ urlpatterns = [
     path('api/recipe-search/', RecipeSearchView.as_view(), name='recipe-search'),
 
     path("api/user/google-login/", GoogleLoginView.as_view(), name="google-login"),
+
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]

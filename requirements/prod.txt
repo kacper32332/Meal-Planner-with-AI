@@ -1,0 +1,4 @@
+-r base.txt
+
+# prod server runtime
+gunicorn>=20.1.0,<21.0.0
