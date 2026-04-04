@@ -6,6 +6,7 @@ The app requires an AWS Secret named **prod/django/databade_url** formatted as a
 - AWS_SECRET_ACCESS_KEY
 - VPC_SECURITY_GROUP_ID
 - VPC_SUBNET_ID
+- API_GATEWAY
 - API_GATEWAY_STAGING
 
 ## AWS Amplify
